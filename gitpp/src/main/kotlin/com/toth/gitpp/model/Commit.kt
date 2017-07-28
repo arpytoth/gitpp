@@ -11,6 +11,7 @@ class Commit {
 
     // Rendering Stuff
     var parentDepth: Int = 0
+    var visited = false
 
     // Actual data
     var message: String = ""

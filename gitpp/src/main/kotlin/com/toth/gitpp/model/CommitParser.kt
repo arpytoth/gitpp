@@ -46,33 +46,38 @@ class CommitParser {
         return setRenderingHints(commits)
     }
 
-    fun setRenderingHints(commits: ArrayList<Commit>): ArrayList<Commit> {
-        var branches = HashMap<String, Int>()
-        var maxBranch = 0
 
-        for (i in commits.indices) {
-            val commit = commits[i]
-            var branch:Int? = branches[commit.id]
+    fun computeGraph(commits: ArrayList<Commit>, graph: ArrayList<Commit>, depth: Int, root: String){
 
-            if (branch == null) {
-                branch = maxBranch
-                maxBranch++
-                maxBranch++
+        var parent = ""
+
+        for (commit in commits) {
+            if (commit.id == root) return
+            if (commit.visited) continue
+
+
+            if (parent == "") {
+
+                commit.visited = true
+                commit.parentDepth = depth
+                parent = commit.parentId
+                graph.add(commit)
+
+            } else if (parent.equals(commit.id)) {
+                computeGraph(commits, graph, depth + 1, commit.id)
+
+                commit.visited = true
+                commit.parentDepth = depth
+                parent = commit.parentId
+                graph.add(commit)
             }
-
-            if (branches[commit.parentId] == null)
-                branches[commit.parentId] = branch
-
-            commit.parentDepth = branch
         }
+    }
 
-        var sortedList = ArrayList<Commit>()
-
-
-        //sortedList.addAll(
-        //        commits.sortedWith(compareBy<Commit> { it.parentDepth } .thenByDescending { it.timestamp })
-        //)
-        return commits
+    fun setRenderingHints(commits: ArrayList<Commit>): ArrayList<Commit> {
+        var graph = ArrayList<Commit>()
+        computeGraph(commits, graph, 0, "")
+        return graph
     }
 
 }
